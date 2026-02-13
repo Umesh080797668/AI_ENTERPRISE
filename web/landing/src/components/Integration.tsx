@@ -6,6 +6,15 @@ import Link from 'next/link';
 export const Integration = () => {
   const [activeCategory, setActiveCategory] = useState("All Integrations");
   const [selectedGuide, setSelectedGuide] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = () => {
+    const code = `npm install @ai-enterprise/${selectedGuide.title?.toLowerCase().replace(/\s+/g, '-')}
+npx ai-ent init --key=$API_KEY`;
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const integrationCategories = [
     { name: "All Integrations", count: 25 },
@@ -400,9 +409,107 @@ export const Integration = () => {
                   </button>
                 </div>
                 
-                <div className="p-6 md:p-8 space-y-8">
-                  {/* Enhanced Content Placeholder */}
-                  <div className="grid md:grid-cols-3 gap-8">
+                <div className="p-6 md:p-8 space-y-8 mt-4">
+                  {selectedGuide.type !== 'integration' ? (
+                    // Guide Specific Content
+                    <div className="grid md:grid-cols-3 gap-8">
+                       <div className="md:col-span-2 space-y-8">
+                          <section>
+                            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                              <Play className="w-5 h-5 text-blue-600" /> Tutorial Overview
+                            </h3>
+                            <p className="text-slate-600 leading-relaxed mb-4">
+                              This guide walks you through the complete process of {selectedGuide.title.toLowerCase()}. 
+                              We'll cover initial setup, configuration, and best practices for deployment.
+                            </p>
+                            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                              <h4 className="font-semibold text-blue-900 mb-2 text-sm flex items-center gap-2">
+                                <Star className="w-4 h-4" /> What you'll learn
+                              </h4>
+                              <ul className="grid grid-cols-1 gap-2">
+                                {[
+                                  "Environment configuration and secrets management",
+                                  "Implementing core API authentication flows",
+                                  "Handling error states and retries",
+                                  "Production deployment considerations"
+                                ].map((item, i) => (
+                                  <li key={i} className="flex items-center gap-2 text-sm text-blue-700">
+                                    <CheckCircle className="w-4 h-4 opacity-60" /> {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </section>
+
+                          <section>
+                            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                               <FileText className="w-5 h-5 text-slate-700" /> Syllabus
+                            </h3>
+                            <div className="border border-slate-200 rounded-xl overflow-hidden">
+                              {[
+                                { title: "Introduction & Concepts", duration: "5 min", status: "completed" },
+                                { title: "Setting up your Environment", duration: "10 min", status: "current" },
+                                { title: "Making your First API Call", duration: "15 min", status: "locked" },
+                                { title: "Handling Responses & Errors", duration: "10 min", status: "locked" }
+                              ].map((module, i) => (
+                                <div key={i} className={`p-4 flex items-center justify-between ${i !== 3 ? 'border-b border-slate-100' : ''} ${module.status === 'current' ? 'bg-blue-50/50' : 'bg-white'}`}>
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                                      ${module.status === 'completed' ? 'bg-green-100 text-green-700' : 
+                                        module.status === 'current' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                      {module.status === 'completed' ? <Check className="w-4 h-4" /> : i + 1}
+                                    </div>
+                                    <div>
+                                      <h4 className={`font-medium ${module.status === 'locked' ? 'text-slate-400' : 'text-slate-900'}`}>{module.title}</h4>
+                                      <p className="text-xs text-slate-500">{module.duration}</p>
+                                    </div>
+                                  </div>
+                                  {module.status === 'current' && (
+                                    <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                      Start
+                                    </button>
+                                  )}
+                                  {module.status === 'locked' && <Shield className="w-4 h-4 text-slate-300" />}
+                                </div>
+                              ))}
+                            </div>
+                          </section>
+                       </div>
+                       
+                       <div className="space-y-6 mt-8 md:mt-12">
+                          <div className="bg-slate-50 rounded-xl p-6 border border-slate-100">
+                            <h4 className="font-semibold text-slate-900 mb-4">Resources</h4>
+                            <ul className="space-y-3 text-sm">
+                              <li>
+                                <Link href="/documentation" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                                  <FileText className="w-4 h-4" /> Full Documentation
+                                </Link>
+                              </li>
+                              <li>
+                                <Link href="/api-reference" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                                  <Code className="w-4 h-4" /> API Reference
+                                </Link>
+                              </li>
+                              <li>
+                                <Link href="https://github.com/Umesh080797668/AI_ENTERPRISE" target="_blank" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                                  <Globe className="w-4 h-4" /> Example Repo
+                                </Link>
+                              </li>
+                            </ul>
+                          </div>
+
+                          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white">
+                            <h4 className="font-bold mb-2">Need Help?</h4>
+                            <p className="text-blue-100 text-sm mb-4">Our support team is available 24/7 to assist with your integration.</p>
+                            <Link href="/contact" className="inline-block w-full text-center bg-white/10 hover:bg-white/20 backdrop-blur-sm py-2 rounded-lg text-sm font-medium transition-colors">
+                              Contact Support
+                            </Link>
+                          </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Integration Docs Specific Content
+                    <div className="grid md:grid-cols-3 gap-8">
                     <div className="md:col-span-2 space-y-8">
                       <section>
                         <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -419,7 +526,7 @@ export const Integration = () => {
                           </li>
                           <li className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                             <Check className="w-4 h-4 mt-1 text-blue-500 shrink-0" />
-                            <span className="text-slate-700 text-sm">{selectedGuide.type !== 'integration' ? 'Development environment (Node.js v18+ or Python 3.10+)' : 'Valid HTTPS endpoint for receiving webhook payloads'}</span>
+                            <span className="text-slate-700 text-sm">Valid HTTPS endpoint for receiving webhook payloads</span>
                           </li>
                         </ul>
                       </section>
@@ -428,14 +535,23 @@ export const Integration = () => {
                         <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                           <Terminal className="w-5 h-5 text-blue-600" /> Quick Start
                         </h3>
-                        <div className="bg-slate-900 rounded-lg overflow-hidden ring-1 ring-slate-900/5">
+                        <div className="bg-slate-900 rounded-lg overflow-hidden ring-1 ring-slate-900/5 group">
                           <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
                             <div className="flex gap-1.5">
                               <div className="w-3 h-3 rounded-full bg-red-500/20"></div>
                               <div className="w-3 h-3 rounded-full bg-yellow-500/20"></div>
                               <div className="w-3 h-3 rounded-full bg-green-500/20"></div>
                             </div>
-                            <span className="text-xs text-slate-400 font-mono">bash</span>
+                            <div className="flex items-center gap-3">
+                                  <span className="text-xs text-slate-400 font-mono">bash</span>
+                                  <button 
+                                    onClick={handleCopyCode}
+                                    className="text-slate-400 hover:text-white transition-colors p-1"
+                                    title="Copy code"
+                                  >
+                                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                                  </button>
+                                </div>
                           </div>
                           <div className="p-4 font-mono text-sm text-blue-300">
                             <span className="text-slate-500"># Install the SDK</span><br/>
@@ -471,22 +587,22 @@ export const Integration = () => {
                       </section>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-6 mt-8 md:mt-12">
                       <div className="bg-slate-50 rounded-xl p-6 border border-slate-100">
                         <h4 className="font-semibold text-slate-900 mb-4">Resources</h4>
                         <ul className="space-y-3 text-sm">
                           <li>
-                            <Link href="#" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                            <Link href="/documentation" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
                               <FileText className="w-4 h-4" /> Full Documentation
                             </Link>
                           </li>
                           <li>
-                            <Link href="#" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                            <Link href="/api-reference" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
                               <Code className="w-4 h-4" /> API Reference
                             </Link>
                           </li>
                           <li>
-                            <Link href="#" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+                            <Link href="https://github.com/Umesh080797668/AI_ENTERPRISE" target="_blank" className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
                               <Globe className="w-4 h-4" /> Example Repo
                             </Link>
                           </li>
@@ -496,12 +612,13 @@ export const Integration = () => {
                       <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white">
                         <h4 className="font-bold mb-2">Need Help?</h4>
                         <p className="text-blue-100 text-sm mb-4">Our support team is available 24/7 to assist with your integration.</p>
-                        <button className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm py-2 rounded-lg text-sm font-medium transition-colors">
+                        <Link href="/contact" className="inline-block w-full text-center bg-white/10 hover:bg-white/20 backdrop-blur-sm py-2 rounded-lg text-sm font-medium transition-colors">
                           Contact Support
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>
