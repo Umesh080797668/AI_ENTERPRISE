@@ -7,12 +7,13 @@ import { X } from 'lucide-react';
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTopic?: string;
 }
 
-export function ContactModal({ isOpen, onClose }: ContactModalProps) {
+export function ContactModal({ isOpen, onClose, initialTopic = 'general' }: ContactModalProps) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [topic, setTopic] = useState('general');
+  const [topic, setTopic] = useState(initialTopic);
   const [submitted, setSubmitted] = useState(false);
 
   if (!isOpen) return null;
@@ -27,7 +28,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
         setSubmitted(false);
         setEmail('');
         setMessage('');
-        setTopic('general');
+        setTopic(initialTopic);
     }, 2000);
   };
 
@@ -82,6 +83,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 <option value="billing">Billing & Plans</option>
                 <option value="technical">Technical Support</option>
                 <option value="enterprise">Enterprise Sales</option>
+                <option value="legal">Legal Inquiries</option>
                 </select>
             </div>
 

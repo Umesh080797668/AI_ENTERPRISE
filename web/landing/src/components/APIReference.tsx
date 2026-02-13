@@ -1,4 +1,7 @@
-import { motion } from 'framer-motion';
+'use client';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import {
   Code,
   Terminal,
@@ -21,13 +24,25 @@ import {
 } from 'lucide-react';
 
 export const APIReference = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
+  const [expandedEndpoint, setExpandedEndpoint] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'details' | 'try' | null>(null);
+  const [downloadingSdk, setDownloadingSdk] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [executingRequest, setExecutingRequest] = useState(false);
+  const [apiResponse, setApiResponse] = useState<string | null>(null);
+
   const categories = [
-    { name: "All", count: 24, active: true },
-    { name: "Core API", count: 8, active: false },
-    { name: "AI Models", count: 6, active: false },
-    { name: "Data Processing", count: 5, active: false },
-    { name: "Analytics", count: 3, active: false },
-    { name: "Administration", count: 2, active: false }
+    { name: "All", count: 24 },
+    { name: "Core API", count: 8 },
+    { name: "AI Models", count: 6 },
+    { name: "Data Processing", count: 5 },
+    { name: "Analytics", count: 3 },
+    { name: "Administration", count: 2 }
   ];
 
   const endpoints = [
@@ -134,6 +149,81 @@ result = client.process({
 
 print(result.insights)`;
 
+  const handleCopy = (text: string, type: string, id?: string) => {
+    navigator.clipboard.writeText(text);
+    if (type === 'code') {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } else if (type === 'baseUrl') {
+      setCopiedBaseUrl(true);
+      setTimeout(() => setCopiedBaseUrl(false), 2000);
+    } else if (type === 'endpoint' && id) {
+      setCopiedEndpoint(id);
+      setTimeout(() => setCopiedEndpoint(null), 2000);
+    }
+  };
+
+  const handleDownloadSdk = (language: string) => {
+    setDownloadingSdk(language);
+    setDownloadProgress(0);
+    const interval = setInterval(() => {
+      setDownloadProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => setDownloadingSdk(null), 1000);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+  };
+
+  const handleViewDetails = (endpoint: any) => {
+    if (expandedEndpoint === endpoint.path && activeTab === 'details') {
+      setExpandedEndpoint(null);
+      setActiveTab(null);
+    } else {
+      setExpandedEndpoint(endpoint.path);
+      setActiveTab('details');
+    }
+  };
+
+  const handleTryItOut = (endpoint: any) => {
+    if (expandedEndpoint === endpoint.path && activeTab === 'try') {
+      setExpandedEndpoint(null);
+      setActiveTab(null);
+    } else {
+      setExpandedEndpoint(endpoint.path);
+      setActiveTab('try');
+      setApiResponse(null);
+    }
+  };
+
+  const handleExecuteRequest = () => {
+    setExecutingRequest(true);
+    setTimeout(() => {
+      setExecutingRequest(false);
+      setApiResponse(JSON.stringify({
+        status: "success",
+        processed_at: new Date().toISOString(),
+        data: {
+          confidence: 0.98,
+          entities: [
+            { text: "AI Enterprise", type: "ORGANIZATION", score: 0.99 },
+            { text: "2024", type: "DATE", score: 0.95 }
+          ]
+        }
+      }, null, 2));
+    }, 1500);
+  };
+  
+  const filteredEndpoints = endpoints.filter((endpoint) => {
+    const matchesSearch = endpoint.path.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          endpoint.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || endpoint.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4 md:px-6">
@@ -162,6 +252,8 @@ print(result.insights)`;
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search endpoints..."
                 className="pl-10 pr-4 py-3 w-full sm:w-80 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -248,7 +340,10 @@ print(result.insights)`;
                     </div>
                   ))}
                 </div>
-                <button className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <button
+                  onClick={() => handleDownloadSdk(sdk.language)}
+                  className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
                   Download
                 </button>
               </motion.div>
@@ -282,7 +377,13 @@ print(result.insights)`;
                 <div className="bg-slate-800 text-slate-100 p-4 rounded-lg font-mono text-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-slate-400">Header</span>
-                    <Copy className="h-4 w-4 text-slate-400 cursor-pointer hover:text-slate-200" />
+                    <button onClick={() => handleCopy('Authorization: Bearer your-api-key-here', 'endpoint', 'auth-header')}>
+                      {copiedEndpoint === 'auth-header' ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-slate-400 cursor-pointer hover:text-slate-200" />
+                      )}
+                    </button>
                   </div>
                   Authorization: Bearer your-api-key-here
                 </div>
@@ -313,8 +414,9 @@ print(result.insights)`;
             {categories.map((category) => (
               <button
                 key={category.name}
+                onClick={() => setSelectedCategory(category.name)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  category.active
+                  category.name === selectedCategory
                     ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
@@ -347,12 +449,18 @@ print(result.insights)`;
             </div>
             <div className="flex items-center justify-between bg-slate-100 px-4 py-3 rounded-lg">
               <code className="text-slate-800 font-mono">https://api.ai-enterprise.com</code>
-              <Copy className="h-5 w-5 text-slate-400 cursor-pointer hover:text-slate-600" />
+              <button onClick={() => handleCopy('https://api.ai-enterprise.com', 'baseUrl')}>
+                {copiedBaseUrl ? (
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                ) : (
+                  <Copy className="h-5 w-5 text-slate-400 cursor-pointer hover:text-slate-600" />
+                )}
+              </button>
             </div>
           </div>
 
           <div className="max-w-4xl mx-auto space-y-6">
-            {endpoints.map((endpoint, index) => (
+            {filteredEndpoints.map((endpoint, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -394,13 +502,139 @@ print(result.insights)`;
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                  <button
+                    onClick={() => handleViewDetails(endpoint)}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
                     View Details
                   </button>
-                  <button className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">
+                  <button
+                    onClick={() => handleTryItOut(endpoint)}
+                    className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                  >
                     Try It Out
                   </button>
                 </div>
+                
+                <AnimatePresence>
+                  {expandedEndpoint === endpoint.path && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden border-t border-slate-100 mt-6 pt-6"
+                    >
+                      {activeTab === 'details' ? (
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                              <Code className="h-4 w-4 text-blue-600" />
+                              Request Parameters
+                            </h4>
+                            <div className="bg-slate-50 rounded-lg p-4 text-sm font-mono text-slate-600 border border-slate-100">
+                              {endpoint.method === 'POST' ? (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                                    <span className="text-blue-700 font-semibold">document</span> 
+                                    <span className="text-slate-400 text-xs bg-white px-2 py-1 rounded border">string, required</span>
+                                  </div>
+                                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                                    <span className="text-blue-700 font-semibold">options</span> 
+                                    <span className="text-slate-400 text-xs bg-white px-2 py-1 rounded border">object, optional</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-blue-700 font-semibold">callback_url</span> 
+                                    <span className="text-slate-400 text-xs bg-white px-2 py-1 rounded border">url, optional</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-slate-400 italic flex items-center justify-center py-4">
+                                  No parameters required
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                              <Terminal className="h-4 w-4 text-green-600" />
+                              Response Schema
+                            </h4>
+                            <div className="bg-slate-900 rounded-lg p-4 text-sm font-mono text-green-400 overflow-x-auto">
+                              <pre>{"{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": \"req_123\",\n    \"result\": ...\n  },\n  \"meta\": {\n    \"latency\": \"ms\"\n  }\n}"}</pre>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="bg-slate-900 rounded-xl p-4 md:p-6 shadow-inner">
+                            <div className="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+                               <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                  endpoint.method === 'GET' ? 'bg-green-500 text-white' : 
+                                  'bg-blue-500 text-white'
+                               }`}>{endpoint.method}</span>
+                               <span className="text-slate-300 font-mono text-sm break-all">{endpoint.path}</span>
+                            </div>
+                             {endpoint.method === 'POST' && (
+                                <div className="mb-6">
+                                   <label className="block text-slate-400 text-xs uppercase font-semibold mb-2">Request Body (JSON)</label>
+                                   <textarea 
+                                     className="w-full bg-slate-800 text-slate-200 rounded-lg p-4 font-mono text-sm h-32 border border-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-light"
+                                     defaultValue='{
+  "document": "Analyze this text for sentiment and entities...",
+  "options": {
+    "extract_entities": true
+  }
+}'
+                                   />
+                                </div>
+                             )}
+                             <div className="flex justify-end">
+                               <button 
+                                 onClick={handleExecuteRequest}
+                                 disabled={executingRequest}
+                                 className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20"
+                               >
+                                 {executingRequest ? (
+                                   <>
+                                     <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"/>
+                                     Processing...
+                                   </>
+                                 ) : (
+                                   <>
+                                     <Play className="h-4 w-4 fill-white" />
+                                     Run Request
+                                   </>
+                                 )}
+                               </button>
+                             </div>
+                          </div>
+                          <AnimatePresence>
+                          {apiResponse && (
+                             <motion.div 
+                               initial={{ opacity: 0, y: 10 }} 
+                               animate={{ opacity: 1, y: 0 }}
+                               className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg"
+                             >
+                                <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+                                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Response Body</span>
+                                   <span className="flex items-center gap-1.5 text-xs font-mono font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
+                                     <span className="block h-2 w-2 rounded-full bg-green-500"></span>
+                                     200 OK
+                                   </span>
+                                </div>
+                                <div className="p-4 bg-slate-50/50">
+                                  <pre className="text-xs font-mono text-slate-700 overflow-x-auto whitespace-pre-wrap">
+                                    {apiResponse}
+                                  </pre>
+                                </div>
+                             </motion.div>
+                          )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </div>
@@ -425,7 +659,16 @@ print(result.insights)`;
             <div className="bg-slate-800 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-slate-400 text-sm">Python</span>
-                <Copy className="h-5 w-5 text-slate-400 cursor-pointer hover:text-slate-200" />
+                <button onClick={() => handleCopy(codeExample, 'code')}>
+                  {copiedCode ? (
+                    <span className="flex items-center text-green-400 text-xs gap-1">
+                      <CheckCircle className="h-4 w-4" />
+                      Copied!
+                    </span>
+                  ) : (
+                    <Copy className="h-5 w-5 text-slate-400 cursor-pointer hover:text-slate-200" />
+                  )}
+                </button>
               </div>
               <pre className="text-slate-100 font-mono text-sm overflow-x-auto">
                 <code>{codeExample}</code>
@@ -433,14 +676,14 @@ print(result.insights)`;
             </div>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <a
-                href="/docs/python-sdk"
+                href="/documentation"
                 className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Python SDK Docs
                 <ExternalLink className="ml-2 h-5 w-5" />
               </a>
               <a
-                href="/docs"
+                href="/documentation"
                 className="inline-flex items-center px-6 py-3 border-2 border-slate-400 text-slate-300 font-semibold rounded-lg hover:bg-slate-700 transition-colors"
               >
                 Full Documentation
@@ -465,14 +708,14 @@ print(result.insights)`;
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="/docs"
+                href="/documentation"
                 className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
               >
                 Browse Documentation
                 <ArrowRight className="ml-2 h-5 w-5" />
               </a>
               <a
-                href="/community/forum"
+                href="/community"
                 className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
               >
                 Join Developer Forum
@@ -480,6 +723,46 @@ print(result.insights)`;
             </div>
           </div>
         </motion.div>
+
+        <AnimatePresence>
+          {downloadingSdk && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl border border-slate-100"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="text-center mb-6">
+                  <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <Download className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Downloading {downloadingSdk} SDK</h3>
+                  <p className="text-slate-600">Your download will start automatically...</p>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 mb-4 overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-blue-600 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${downloadProgress}%` }}
+                    transition={{ ease: "linear" }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-slate-500 font-mono font-medium">
+                  <span>{downloadingSdk} v2.1.0</span>
+                  <span>{downloadProgress}%</span>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

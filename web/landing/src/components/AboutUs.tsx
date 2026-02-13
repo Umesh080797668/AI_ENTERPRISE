@@ -228,15 +228,18 @@ export const AboutUs = () => {
           viewport={{ once: true }}
           className="mb-16"
         >
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Our Journey</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               From concept to industry leader: key milestones in our evolution
             </p>
           </div>
-          <div className="relative">
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-blue-200"></div>
-            <div className="space-y-8">
+          
+          <div className="relative max-w-4xl mx-auto">
+            {/* Center Line */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-200 via-indigo-200 to-blue-200 hidden md:block"></div>
+            
+            <div className="space-y-12 relative">
               {timeline.map((item, index) => (
                 <motion.div
                   key={item.year}
@@ -244,21 +247,46 @@ export const AboutUs = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className={`flex items-center gap-8 ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
+                  className={`flex flex-col md:flex-row items-center gap-8 ${
+                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                  }`}
                 >
-                  <div className="flex-1">
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                          {item.year}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">{item.title}</h3>
-                      <p className="text-slate-600">{item.description}</p>
+                  {/* Content Side */}
+                  <div className={`flex-1 w-full md:w-auto ${index % 2 === 0 ? 'md:text-right' : 'md:text-left'}`}>
+                     <div className={`bg-white rounded-xl p-6 shadow-md border border-slate-100 hover:shadow-lg transition-all duration-300 relative group
+                        ${index % 2 === 0 ? 'md:mr-4' : 'md:ml-4'}
+                     `}>
+                        {/* Mobile: Year Badge inside card */}
+                        <div className="md:hidden mb-4">
+                           <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">
+                              {item.year}
+                           </span>
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-slate-600 leading-relaxed">
+                          {item.description}
+                        </p>
+                        
+                        {/* Decorative arrow for desktop */}
+                        <div className={`hidden md:block absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-t border-r border-slate-100 transform rotate-45
+                           ${index % 2 === 0 ? '-right-2 border-r-slate-100 border-t-slate-100 border-l-transparent border-b-transparent' : '-left-2 border-l-slate-100 border-b-slate-100 border-t-transparent border-r-transparent'}
+                        `}></div>
+                     </div>
+                  </div>
+
+                  {/* Center Year/Dot */}
+                  <div className="relative flex items-center justify-center flex-shrink-0 z-10">
+                    <div className="w-12 h-12 rounded-full bg-blue-600 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xs md:text-sm">
+                       <span className="md:hidden block w-3 h-3 bg-white rounded-full"></span>
+                       <span className="hidden md:block">{item.year}</span>
                     </div>
                   </div>
-                  <div className="w-4 h-4 bg-blue-600 rounded-full border-4 border-white shadow-md flex-shrink-0"></div>
-                  <div className="flex-1"></div>
+
+                  {/* Empty Side for alignment */}
+                  <div className="flex-1 hidden md:block"></div>
                 </motion.div>
               ))}
             </div>

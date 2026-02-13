@@ -1,29 +1,22 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Shield, Scale, BookOpen, AlertTriangle, Users, Mail, MapPin, Phone, ArrowRight, CheckCircle, Clock, Star } from 'lucide-react';
 import Link from 'next/link';
+import { DocViewerModal } from './DocViewerModal';
+import { ContactModal } from './ContactModal';
 
 export const Legal = () => {
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedDoc, setSelectedDoc] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
   const legalCategories = [
-    {
-      name: "Terms & Conditions",
-      count: 3,
-      active: true
-    },
-    {
-      name: "Privacy & Data",
-      count: 4,
-      active: false
-    },
-    {
-      name: "Compliance",
-      count: 5,
-      active: false
-    },
-    {
-      name: "Policies",
-      count: 6,
-      active: false
-    }
+    { name: "All", count: 6 },
+    { name: "Terms & Conditions", count: 2 },
+    { name: "Privacy & Data", count: 2 },
+    { name: "Compliance", count: 1 },
+    { name: "Policies", count: 1 }
   ];
 
   const legalDocs = [
@@ -89,6 +82,35 @@ export const Legal = () => {
     }
   ];
 
+  const filteredDocs = activeCategory === "All" 
+    ? legalDocs 
+    : legalDocs.filter(doc => doc.category === activeCategory);
+
+  const handleOpenDoc = (doc: any) => {
+    setSelectedDoc({
+      ...doc,
+      type: 'article',
+      readTime: '10 min read',
+      content: `
+        <h3>${doc.title}</h3>
+        <p>This is a placeholder for the full content of the ${doc.title}. In a production environment, this would contain the complete legal text, clauses, and detailed information relevant to this document.</p>
+        <h4>1. Introduction</h4>
+        <p>Welcome to our ${doc.title}. This document outlines the key principles and rules regarding...</p>
+        <h4>2. Scope</h4>
+        <p>This policy applies to all users of our platform...</p>
+        <h4>3. Key Provisions</h4>
+        <ul>
+          <li>Compliance with laws</li>
+          <li>User responsibilities</li>
+          <li>Data protection measures</li>
+        </ul>
+        <p>For any questions regarding this document, please contact our legal team.</p>
+      `
+    });
+    setIsModalOpen(true);
+  };
+
+
   const complianceStandards = [
     { name: "SOC 2 Type II", status: "Certified" },
     { name: "ISO 27001", status: "Certified" },
@@ -130,18 +152,22 @@ export const Legal = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="#documents"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
             >
               View Documents
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <Link
-              href="/contact"
+            <button
+              onClick={() => document.getElementById('contact-legal')?.scrollIntoView({ behavior: 'smooth' })}
               className="inline-flex items-center px-6 py-3 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors"
             >
               Contact Legal Team
               <Mail className="ml-2 h-5 w-5" />
-            </Link>
+            </button>
           </div>
         </motion.div>
 
@@ -220,8 +246,9 @@ export const Legal = () => {
             {legalCategories.map((category) => (
               <button
                 key={category.name}
+                onClick={() => setActiveCategory(category.name)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  category.active
+                  activeCategory === category.name
                     ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
@@ -241,14 +268,15 @@ export const Legal = () => {
           className="mb-16"
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {legalDocs.map((doc, index) => (
+            {filteredDocs.map((doc, index) => (
               <motion.div
-                key={index}
+                key={doc.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow group"
+                className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow group cursor-pointer"
+                onClick={() => handleOpenDoc(doc)}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
@@ -278,13 +306,12 @@ export const Legal = () => {
                   <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
                     {doc.category}
                   </span>
-                  <Link
-                    href={doc.href}
+                  <button
                     className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
                   >
                     Read Document
                     <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -293,6 +320,7 @@ export const Legal = () => {
 
         {/* Contact Legal Team */}
         <motion.div
+          id="contact-legal"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
@@ -318,7 +346,12 @@ export const Legal = () => {
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-4">
                   <Mail className="h-8 w-8 text-white mx-auto mb-3" />
                   <h3 className="font-semibold mb-2">Email Support</h3>
-                  <p className="text-blue-100 text-sm">legal@ai-enterprise.com</p>
+                  <button 
+                    onClick={() => setIsContactModalOpen(true)}
+                    className="text-blue-100 text-sm hover:text-white transition-colors underline"
+                  >
+                    Contact via Form
+                  </button>
                   <p className="text-blue-200 text-xs mt-1">Response within 24 hours</p>
                 </div>
               </div>
@@ -326,7 +359,7 @@ export const Legal = () => {
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-4">
                   <Phone className="h-8 w-8 text-white mx-auto mb-3" />
                   <h3 className="font-semibold mb-2">Phone Support</h3>
-                  <p className="text-blue-100 text-sm">1-800-AI-LEGAL</p>
+                  <a href="tel:1-800-AI-LEGAL" className="text-blue-100 text-sm hover:text-white transition-colors">1-800-AI-LEGAL</a>
                   <p className="text-blue-200 text-xs mt-1">Mon-Fri, 9AM-6PM EST</p>
                 </div>
               </div>
@@ -340,17 +373,29 @@ export const Legal = () => {
               </div>
             </div>
             <div className="text-center mt-8">
-              <Link
-                href="/contact"
+              <button
+                onClick={() => setIsContactModalOpen(true)}
                 className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
               >
                 Contact Legal Team
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </button>
             </div>
           </div>
         </motion.div>
       </div>
+
+      <DocViewerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        doc={selectedDoc}
+      />
+      
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        initialTopic="legal"
+      />
     </section>
   );
 };

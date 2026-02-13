@@ -1,14 +1,15 @@
+'use client';
+
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, CheckCircle, AlertTriangle, Zap, Bug, Star, TrendingUp, ArrowRight, Filter, Download, Bell } from 'lucide-react';
+import { Calendar, CheckCircle, AlertTriangle, Zap, Bug, Star, TrendingUp, ArrowRight, Filter, Download, Bell, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export const Changelog = () => {
-  const changelogCategories = [
-    { name: "All Updates", count: 24, active: true },
-    { name: "Features", count: 12, active: false },
-    { name: "Improvements", count: 8, active: false },
-    { name: "Bug Fixes", count: 4, active: false }
-  ];
+  const [activeCategory, setActiveCategory] = useState("All Updates");
+  const [email, setEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   const changes = [
     {
@@ -71,12 +72,89 @@ export const Changelog = () => {
     }
   ];
 
+  // Helper to get total count for a specific change type across all versions
+  const getCount = (category: string) => {
+    if (category === "All Updates") {
+      return changes.reduce((acc, curr) => acc + curr.changes.length, 0);
+    }
+    const typeMap: Record<string, string> = {
+      "Features": "feature",
+      "Improvements": "improvement",
+      "Bug Fixes": "bug"
+    };
+    const targetType = typeMap[category];
+    return changes.reduce((acc, version) => {
+      return acc + version.changes.filter(c => c.type === targetType).length;
+    }, 0);
+  };
+
+  const changelogCategories = [
+    { name: "All Updates", count: getCount("All Updates") },
+    { name: "Features", count: getCount("Features") },
+    { name: "Improvements", count: getCount("Improvements") },
+    { name: "Bug Fixes", count: getCount("Bug Fixes") }
+  ];
+
+  // Filter changes based on active category
+  // We want to show versions that contain at least one matching changed item.
+  // And within those versions, only show the matching items?
+  // Let's assume we filter the items inside too.
+  const filteredVersions = changes.map(version => {
+    if (activeCategory === "All Updates") return version;
+    
+    const typeMap: Record<string, string> = {
+      "Features": "feature",
+      "Improvements": "improvement",
+      "Bug Fixes": "bug"
+    };
+    const targetType = typeMap[activeCategory];
+    
+    const filteredItems = version.changes.filter(c => c.type === targetType);
+    return {
+      ...version,
+      changes: filteredItems
+    };
+  }).filter(version => version.changes.length > 0);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    setIsSubscribing(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsSubscribing(false);
+    setEmail("");
+    alert("Thanks for subscribing! You'll receive updates in your inbox.");
+  };
+
+  const handleTopSubscribe = () => {
+    alert("Thanks for subscribing to updates!");
+  };
+
+  const handleDownload = async (version: string) => {
+    setIsDownloading(version);
+    // Simulate download preparation
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const element = document.createElement("a");
+    const file = new Blob([`Changelog for ${version}\n\n... content ...`], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `release-${version}.txt`;
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+    document.body.removeChild(element);
+    
+    setIsDownloading(null);
+  };
+
   const stats = [
     { number: "24+", label: "Total Releases" },
     { number: "50+", label: "New Features" },
     { number: "99.9%", label: "Uptime" },
     { number: "15k+", label: "Active Users" }
   ];
+
 
   return (
     <section className="py-20 bg-slate-50">
@@ -109,7 +187,9 @@ export const Changelog = () => {
               View Latest Release
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <button className="inline-flex items-center px-6 py-3 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors">
+            <button 
+              onClick={handleTopSubscribe}
+              className="inline-flex items-center px-6 py-3 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors">
               <Bell className="mr-2 h-5 w-5" />
               Subscribe to Updates
             </button>
@@ -153,8 +233,9 @@ export const Changelog = () => {
             {changelogCategories.map((category) => (
               <button
                 key={category.name}
+                onClick={() => setActiveCategory(category.name)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  category.active
+                  activeCategory === category.name
                     ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
@@ -173,9 +254,13 @@ export const Changelog = () => {
           viewport={{ once: true }}
           className="max-w-4xl mx-auto"
         >
-          {changes.map((version, index) => (
+          {filteredVersions.length === 0 ? (
+            <div className="text-center py-12 text-slate-500">
+              No updates found for this category.
+            </div>
+          ) : filteredVersions.map((version, index) => (
             <motion.div
-              key={index}
+              key={version.version}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -214,9 +299,17 @@ export const Changelog = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-sm text-slate-500 mb-1">{version.downloads} downloads</div>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1">
-                    <Download className="h-4 w-4" />
-                    Download
+                  <button 
+                    onClick={() => handleDownload(version.version)}
+                    disabled={isDownloading === version.version}
+                    className={`text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 ${isDownloading === version.version ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    {isDownloading === version.version ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    {isDownloading === version.version ? 'Downloading...' : 'Download'}
                   </button>
                 </div>
               </div>
@@ -260,16 +353,27 @@ export const Changelog = () => {
               Subscribe to our changelog and get notified about new releases,
               features, and important updates directly in your inbox.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-3 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-300"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              <button className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">
-                Subscribe
+              <button 
+                type="submit"
+                disabled={isSubscribing}
+                className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
+              >
+                {isSubscribing ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  'Subscribe'
+                )}
               </button>
-            </div>
+            </form>
             <p className="text-blue-200 text-sm mt-4">
               We respect your privacy. Unsubscribe at any time.
             </p>

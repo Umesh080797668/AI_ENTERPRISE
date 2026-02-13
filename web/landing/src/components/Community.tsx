@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   Users,
   MessageCircle,
@@ -90,7 +91,7 @@ export const Community = () => {
       icon: BookOpen,
       title: "Documentation",
       description: "Comprehensive guides, API references, and tutorials",
-      href: "/docs",
+      href: "/documentation",
       category: "Learning"
     },
     {
@@ -178,12 +179,12 @@ export const Community = () => {
               Join Discord
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
-            <a
+            <Link
               href="/community/forum"
               className="inline-flex items-center px-8 py-4 border-2 border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors"
             >
               Visit Forum
-            </a>
+            </Link>
           </div>
         </motion.div>
 
@@ -307,12 +308,12 @@ export const Community = () => {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    <Link href={`/community/events/register/${index + 1}`} className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-center">
                       Register
-                    </button>
-                    <button className="px-6 py-3 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors">
+                    </Link>
+                    <Link href={`/community/events/${index + 1}`} className="px-6 py-3 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors text-center">
                       Learn More
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </motion.div>
@@ -431,12 +432,12 @@ export const Community = () => {
                 Join Discord Server
                 <ExternalLink className="ml-2 h-5 w-5" />
               </a>
-              <a
+              <Link
                 href="/community/forum"
                 className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
               >
                 Explore Forum
-              </a>
+              </Link>
             </div>
           </div>
         </motion.div>

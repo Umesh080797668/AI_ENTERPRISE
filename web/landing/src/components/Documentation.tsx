@@ -3,18 +3,29 @@ import { motion } from 'framer-motion';
 import { Book, Code, Users, Settings, Search, Filter, Clock, Star, TrendingUp, ArrowRight, Play, FileText, Zap, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { ContactModal } from './ContactModal';
+import { DocViewerModal } from './DocViewerModal';
 
 export const Documentation = () => {
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedDoc, setSelectedDoc] = useState<{
+    title: string;
+    description: string;
+    type: 'article' | 'guide' | 'section';
+    readTime?: string;
+    category?: string;
+  } | null>(null);
+
   const categories = [
-    { name: "All", count: 150, active: true },
-    { name: "Getting Started", count: 12, active: false },
-    { name: "Tutorials", count: 45, active: false },
-    { name: "API Guides", count: 28, active: false },
-    { name: "Best Practices", count: 18, active: false },
-    { name: "Troubleshooting", count: 15, active: false },
-    { name: "Security", count: 10, active: false },
-    { name: "Integrations", count: 22, active: false }
+    { name: "All", count: 150 },
+    { name: "Getting Started", count: 12 },
+    { name: "Tutorials", count: 45 },
+    { name: "API Guides", count: 28 },
+    { name: "Best Practices", count: 18 },
+    { name: "Troubleshooting", count: 15 },
+    { name: "Security", count: 10 },
+    { name: "Integrations", count: 22 }
   ];
 
   const featuredArticles = [
@@ -52,6 +63,7 @@ export const Documentation = () => {
       href: "/documentation/getting-started",
       articles: 12,
       category: "Beginner",
+      filterCategory: "Getting Started",
       popular: true
     },
     {
@@ -61,6 +73,7 @@ export const Documentation = () => {
       href: "/api-reference",
       articles: 28,
       category: "Developer",
+      filterCategory: "API Guides",
       popular: true
     },
     {
@@ -70,6 +83,7 @@ export const Documentation = () => {
       href: "/documentation/guides",
       articles: 45,
       category: "Intermediate",
+      filterCategory: "Tutorials",
       popular: false
     },
     {
@@ -79,6 +93,7 @@ export const Documentation = () => {
       href: "/documentation/configuration",
       articles: 18,
       category: "Advanced",
+      filterCategory: "Best Practices",
       popular: false
     },
     {
@@ -88,6 +103,7 @@ export const Documentation = () => {
       href: "/documentation/security",
       articles: 10,
       category: "Enterprise",
+      filterCategory: "Security",
       popular: true
     },
     {
@@ -97,6 +113,7 @@ export const Documentation = () => {
       href: "/documentation/integrations",
       articles: 22,
       category: "Integration",
+      filterCategory: "Integrations",
       popular: false
     }
   ];
@@ -132,6 +149,26 @@ export const Documentation = () => {
     { number: "99%", label: "Accuracy Rate" }
   ];
 
+  const filteredFeaturedArticles = featuredArticles.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          article.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategory === "All" || article.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const filteredQuickStarts = quickStarts.filter(guide => {
+    const matchesSearch = guide.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          guide.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  const filteredDocs = docs.filter(doc => {
+     const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          doc.description.toLowerCase().includes(searchQuery.toLowerCase());
+     const matchesCategory = activeCategory === "All" || doc.filterCategory === activeCategory;
+     return matchesSearch && matchesCategory;
+  });
+
   return (
     <section className="py-20 bg-slate-50">
       <div className="container mx-auto px-4 md:px-6">
@@ -161,6 +198,8 @@ export const Documentation = () => {
               <input
                 type="text"
                 placeholder="Search documentation..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-3 w-full sm:w-80 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -214,7 +253,7 @@ export const Documentation = () => {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            {featuredArticles.map((article, index) => (
+            {filteredFeaturedArticles.map((article, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -238,13 +277,19 @@ export const Documentation = () => {
                     <Clock className="h-4 w-4" />
                     {article.readTime}
                   </div>
-                  <Link
-                    href={article.href}
+                  <button
+                    onClick={() => setSelectedDoc({
+                      title: article.title,
+                      description: article.description,
+                      type: 'article',
+                      readTime: article.readTime,
+                      category: article.category
+                    })}
                     className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
                   >
                     Read Article
                     <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -267,7 +312,7 @@ export const Documentation = () => {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {quickStarts.map((guide, index) => (
+            {filteredQuickStarts.map((guide, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -293,13 +338,19 @@ export const Documentation = () => {
                     <Clock className="h-4 w-4" />
                     {guide.time}
                   </div>
-                  <Link
-                    href={guide.href}
+                  <button
+                    onClick={() => setSelectedDoc({
+                      title: guide.title,
+                      description: guide.description,
+                      type: 'guide',
+                      readTime: guide.time,
+                      category: guide.difficulty
+                    })}
                     className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
                   >
                     Start Guide
                     <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -318,8 +369,9 @@ export const Documentation = () => {
             {categories.map((category) => (
               <button
                 key={category.name}
+                onClick={() => setActiveCategory(category.name)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  category.active
+                  activeCategory === category.name
                     ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
@@ -338,7 +390,7 @@ export const Documentation = () => {
           className="mb-16"
         >
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {docs.map((doc, index) => (
+            {filteredDocs.map((doc, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -364,13 +416,18 @@ export const Documentation = () => {
                     <Star className="h-4 w-4" />
                     {doc.popular ? 'Popular' : 'Essential'}
                   </div>
-                  <Link
-                    href={doc.href}
+                  <button
+                    onClick={() => setSelectedDoc({
+                      title: doc.title,
+                      description: doc.description,
+                      type: 'section',
+                      category: doc.category
+                    })}
                     className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
                   >
                     Explore
                     <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -416,6 +473,12 @@ export const Documentation = () => {
             </div>
           </div>
         </motion.div>
+        
+        <DocViewerModal 
+            isOpen={!!selectedDoc} 
+            onClose={() => setSelectedDoc(null)} 
+            doc={selectedDoc} 
+        />
         </div>
     </section>
   );

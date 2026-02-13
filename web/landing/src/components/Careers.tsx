@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin,
   Clock,
@@ -11,16 +12,34 @@ import {
   Award,
   TrendingUp,
   Target,
-  CheckCircle,
   ArrowRight,
   Star,
   Briefcase,
-  Globe
+  Globe,
+  ChevronDown
 } from 'lucide-react';
+import { ApplyModal } from './ApplyModal';
+// import { ContactModal } from './ContactModal'; // Assuming standard contact modal exists, or link to /contact
 
 export const Careers = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedJobTitle, setSelectedJobTitle] = useState<string | undefined>(undefined);
+  const [expandedJobIds, setExpandedJobIds] = useState<number[]>([]);
+
+  const handleApply = (jobTitle?: string) => {
+    setSelectedJobTitle(jobTitle);
+    setModalOpen(true);
+  };
+
+  const toggleJobDetails = (id: number) => {
+    setExpandedJobIds(prev => 
+      prev.includes(id) ? prev.filter(jobId => jobId !== id) : [...prev, id]
+    );
+  };
+
   const jobs = [
     {
+      id: 1,
       title: "Senior AI Engineer",
       location: "Remote",
       type: "Full-time",
@@ -28,9 +47,16 @@ export const Careers = () => {
       description: "Join our AI team to build next-generation machine learning models and systems.",
       department: "Engineering",
       experience: "5+ years",
-      skills: ["Python", "TensorFlow", "PyTorch", "MLOps"]
+      skills: ["Python", "TensorFlow", "PyTorch", "MLOps"],
+      responsibilities: [
+        "Design and implement scalable machine learning models.",
+        "Collaborate with data scientists and engineers to deploy models.",
+        "Optimize model performance and accuracy.",
+        "Stay up-to-date with the latest AI trends and technologies."
+      ]
     },
     {
+      id: 2,
       title: "Full Stack Developer",
       location: "San Francisco, CA",
       type: "Full-time",
@@ -38,9 +64,16 @@ export const Careers = () => {
       description: "Build scalable web applications and APIs for our enterprise platform.",
       department: "Engineering",
       experience: "3+ years",
-      skills: ["React", "Node.js", "TypeScript", "PostgreSQL"]
+      skills: ["React", "Node.js", "TypeScript", "PostgreSQL"],
+      responsibilities: [
+        "Develop and maintain full-stack web applications.",
+        "Ensure high performance and responsiveness of applications.",
+        "Collaborate with cross-functional teams to define requirements.",
+        "Write clean, maintainable, and testable code."
+      ]
     },
     {
+      id: 3,
       title: "DevOps Engineer",
       location: "Remote",
       type: "Full-time",
@@ -48,9 +81,16 @@ export const Careers = () => {
       description: "Design and maintain our cloud infrastructure and deployment pipelines.",
       department: "Engineering",
       experience: "4+ years",
-      skills: ["Kubernetes", "Docker", "AWS", "Terraform"]
+      skills: ["Kubernetes", "Docker", "AWS", "Terraform"],
+      responsibilities: [
+        "Manage and optimize cloud infrastructure on AWS.",
+        "Implement CI/CD pipelines for automated deployment.",
+        "Ensure system reliability, scalability, and security.",
+        "Monitor system performance and troubleshoot issues."
+      ]
     },
     {
+      id: 4,
       title: "Product Manager",
       location: "New York, NY",
       type: "Full-time",
@@ -58,9 +98,16 @@ export const Careers = () => {
       description: "Drive product strategy and work closely with engineering teams.",
       department: "Product",
       experience: "5+ years",
-      skills: ["Product Strategy", "Analytics", "Agile", "User Research"]
+      skills: ["Product Strategy", "Analytics", "Agile", "User Research"],
+      responsibilities: [
+        "Define product vision, strategy, and roadmap.",
+        "Gather and analyze user feedback to inform product decisions.",
+        "Prioritize features and manage the product backlog.",
+        "Work closely with engineering, design, and marketing teams."
+      ]
     },
     {
+      id: 5,
       title: "UX/UI Designer",
       location: "Remote",
       type: "Full-time",
@@ -68,9 +115,16 @@ export const Careers = () => {
       description: "Create intuitive and beautiful user experiences for our platform.",
       department: "Design",
       experience: "3+ years",
-      skills: ["Figma", "User Research", "Prototyping", "Design Systems"]
+      skills: ["Figma", "User Research", "Prototyping", "Design Systems"],
+      responsibilities: [
+        "Design user interfaces for web and mobile applications.",
+        "Conduct user research and usability testing.",
+        "Create wireframes, prototypes, and high-fidelity mockups.",
+        "Collaborate with developers to ensure design implementation."
+      ]
     },
     {
+      id: 6,
       title: "Data Scientist",
       location: "Austin, TX",
       type: "Full-time",
@@ -78,7 +132,13 @@ export const Careers = () => {
       description: "Analyze complex datasets to drive insights and model improvements.",
       department: "Data",
       experience: "4+ years",
-      skills: ["Python", "R", "SQL", "Statistics"]
+      skills: ["Python", "R", "SQL", "Statistics"],
+      responsibilities: [
+        "Analyze large datasets to extract actionable insights.",
+        "Build predictive models and algorithms.",
+        "Visualize data to communicate findings to stakeholders.",
+        "Clean and preprocess data for analysis."
+      ]
     }
   ];
 
@@ -304,7 +364,7 @@ export const Careers = () => {
           <div className="space-y-6">
             {jobs.map((job, index) => (
               <motion.div
-                key={index}
+                key={job.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -350,12 +410,38 @@ export const Careers = () => {
                     </div>
                   </div>
                 </div>
+
+                <AnimatePresence>
+                  {expandedJobIds.includes(job.id) && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="border-t border-slate-100 pt-6 mb-6 overflow-hidden"
+                    >
+                      <h4 className="text-lg font-semibold text-slate-900 mb-3">Key Responsibilities:</h4>
+                      <ul className="list-disc list-inside text-slate-600 space-y-2 mb-6 ml-2">
+                        {job.responsibilities.map((resp, i) => (
+                          <li key={i}>{resp}</li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                  <button 
+                    onClick={() => handleApply(job.title)}
+                    className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
                     Apply Now
                   </button>
-                  <button className="px-6 py-3 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors">
-                    Learn More
+                  <button 
+                    onClick={() => toggleJobDetails(job.id)}
+                    className="px-6 py-3 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    {expandedJobIds.includes(job.id) ? 'Show Less' : 'Learn More'}
+                    <ChevronDown className={`h-4 w-4 transition-transform ${expandedJobIds.includes(job.id) ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
               </motion.div>
@@ -435,19 +521,26 @@ export const Careers = () => {
               <a
                 href="/contact"
                 className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+                onClick={(e) => { e.preventDefault(); /* Navigate to contact or show contact modal */ }}
               >
                 Get In Touch
                 <ArrowRight className="ml-2 h-5 w-5" />
               </a>
-              <a
-                href="mailto:careers@ai-enterprise.com"
+              <button
+                onClick={() => handleApply()}
                 className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
               >
                 Send Us Your Resume
-              </a>
+              </button>
             </div>
           </div>
         </motion.div>
+
+        <ApplyModal 
+          isOpen={modalOpen} 
+          onClose={() => setModalOpen(false)} 
+          jobTitle={selectedJobTitle} 
+        />
       </div>
     </section>
   );
