@@ -49,7 +49,7 @@ export const Hero = () => {
           className="mt-8 flex flex-col sm:flex-row gap-4"
         >
           <Tooltip content="Start your 14-day free trial">
-             <Link href="http://localhost:3001/login?mode=signup">
+             <Link href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'}/login?mode=signup`}>
                 <Button size="lg" className="w-full sm:w-auto gap-2">
                   Start Free Trial <ArrowRight className="h-4 w-4" />
                 </Button>

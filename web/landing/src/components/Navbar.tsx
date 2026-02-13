@@ -70,10 +70,10 @@ export const Navbar = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="flex items-center gap-4"
         >
-          <Link href="http://localhost:3001/login" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+          <Link href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'}/login`} className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
             Login
           </Link>
-          <Link href="http://localhost:3001/login?mode=signup">
+          <Link href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'}/login?mode=signup`}>
             <Button size="sm">Get Started</Button>
           </Link>
         </motion.div>

@@ -259,7 +259,7 @@ print(result.insights)`;
               />
             </div>
             <a
-              href="http://localhost:3001/login?mode=signup"
+              href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'}/login?mode=signup`}
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
             >
               Get Started

@@ -55,7 +55,7 @@ export const Pricing = () => {
                   </motion.li>
                ))}
             </ul>
-             <Link href="http://localhost:3001/login?mode=signup">
+             <Link href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'}/login?mode=signup`}>
                <Button variant="outline" className="mt-8 w-full">Get Started</Button>
              </Link>
           </motion.div>
@@ -99,7 +99,7 @@ export const Pricing = () => {
                   </motion.li>
                ))}
             </ul>
-             <Link href="http://localhost:3001/login?mode=signup">
+             <Link href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'}/login?mode=signup`}>
                <Button className="mt-8 w-full bg-blue-600 hover:bg-blue-500 border-none text-white">Start Free Trial</Button>
              </Link>
           </motion.div>
