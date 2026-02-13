@@ -1,0 +1,15 @@
+.settings-container {
+  padding: 20px;
+  max-width: 600px;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+.actions {
+  margin-top: 16px;
+}

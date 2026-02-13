@@ -232,9 +232,9 @@ export default function SignupPage() {
           <div className="mt-6">
             <p className="text-xs text-center text-gray-500 max-w-xs mx-auto">
               By registering, you agree to our{' '}
-              <a href="#" className="underline hover:text-gray-900">Terms of Service</a>{' '}
+              <Link href="/terms" className="underline hover:text-gray-900">Terms of Service</Link>{' '}
               and{' '}
-              <a href="#" className="underline hover:text-gray-900">Privacy Policy</a>.
+              <Link href="/privacy" className="underline hover:text-gray-900">Privacy Policy</Link>.
             </p>
           </div>
         </div>
@@ -281,7 +281,7 @@ export default function SignupPage() {
                   </div>
 
                   <blockquote className="text-2xl font-medium text-white leading-relaxed mb-8 block drop-shadow-lg">
-                    "{slide.quote}"
+                    &quot;{slide.quote}&quot;
                   </blockquote>
                   
                   <div className="flex items-center gap-4">

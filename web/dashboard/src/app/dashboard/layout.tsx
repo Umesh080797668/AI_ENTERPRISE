@@ -1,88 +1,56 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Header } from '@/components/layout/Header';
 
-const navigation = [
-  { name: 'Overview', href: '/dashboard' },
-  { name: 'Documents', href: '/dashboard/documents' },
-  { name: 'Chat with AI', href: '/dashboard/chat' },
-];
-
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { user, isLoading } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!isLoading && !user) {
       router.push('/login');
-    } else {
-      setLoading(false);
     }
-  }, [router]);
+  }, [user, isLoading, router]);
 
-  if (loading) {
-     return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  if (isLoading) {
+     return (
+       <div className="flex h-screen items-center justify-center bg-gray-50">
+         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
+       </div>
+     );
   }
 
-  return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg">
-        <div className="flex h-16 items-center justify-center border-b px-4">
-          <h1 className="text-xl font-bold text-indigo-600">Enterprise AI</h1>
-        </div>
-        <nav className="mt-6 px-4 space-y-2">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="absolute bottom-4 w-64 px-4">
-          <button
-            onClick={() => {
-              localStorage.removeItem('token');
-              window.location.href = '/login';
-            }}
-            className="w-full rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
-          >
-            Sign out
-          </button>
-        </div>
-      </div>
+  if (!user) return null;
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <header className="flex h-16 items-center justify-between border-b bg-white px-8 shadow-sm">
-           <h2 className="text-lg font-semibold text-gray-800">
-             {navigation.find((item) => item.href === pathname)?.name || 'Dashboard'}
-           </h2>
-           <div className="flex items-center gap-4">
-             <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-               U
-             </div>
-           </div>
-        </header>
-        <main className="p-8">{children}</main>
+  return (
+    <div className="flex h-screen bg-slate-50 font-sans overflow-hidden text-slate-900">
+      {/* Mobile Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm transition-opacity md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+
+      {/* Sidebar Component */}
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Header Component */}
+        <Header setSidebarOpen={setSidebarOpen} />
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto p-6 scroll-smooth">
+          <div className="max-w-7xl mx-auto space-y-6 animate-fade-in-up">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

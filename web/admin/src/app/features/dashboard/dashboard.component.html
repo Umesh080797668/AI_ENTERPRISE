@@ -1,0 +1,217 @@
+<div class="space-y-8">
+  
+  <!-- Welcome Section -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800 tracking-tight">System Overview</h1>
+      <p class="text-slate-500 mt-1">Real-time monitoring and global control center.</p>
+    </div>
+    <div class="flex gap-3">
+      <button class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm flex items-center gap-2">
+        <mat-icon class="text-lg">refresh</mat-icon> Refresh Data
+      </button>
+      <button class="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium text-sm shadow-lg shadow-slate-900/20 flex items-center gap-2">
+        <mat-icon class="text-lg">file_download</mat-icon> Export Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Tenants Card -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+      <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <mat-icon class="text-6xl text-indigo-600">business</mat-icon>
+      </div>
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <mat-icon>business</mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-500">Total Tenants</p>
+          <h3 class="text-2xl font-bold text-slate-800">{{ (stats$ | async)?.totalTenants || 0 }}</h3>
+        </div>
+      </div>
+      <div class="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-full">
+        <mat-icon class="text-xs mr-1">trending_up</mat-icon>
+        <span>+1 this week</span>
+      </div>
+    </div>
+
+    <!-- Users Card -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+      <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <mat-icon class="text-6xl text-violet-600">group</mat-icon>
+      </div>
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+          <mat-icon>group</mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-500">Active Users</p>
+          <h3 class="text-2xl font-bold text-slate-800">{{ (stats$ | async)?.totalUsers || 0 }}</h3>
+        </div>
+      </div>
+      <div class="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-full">
+        <mat-icon class="text-xs mr-1">person_add</mat-icon>
+        <span>+12 new users</span>
+      </div>
+    </div>
+
+    <!-- API Calls -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+      <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <mat-icon class="text-6xl text-amber-500">api</mat-icon>
+      </div>
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <mat-icon>api</mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-500">API Requests</p>
+          <h3 class="text-2xl font-bold text-slate-800">{{ ((stats$ | async)?.apiCallsToday || 0) | number }}</h3>
+        </div>
+      </div>
+      <div class="flex items-center text-xs font-medium text-amber-600 bg-amber-50 w-fit px-2 py-1 rounded-full">
+        <mat-icon class="text-xs mr-1">bolt</mat-icon>
+        <span>High Load</span>
+      </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+      <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <mat-icon class="text-6xl text-rose-500">monitor_heart</mat-icon>
+      </div>
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+          <mat-icon>favorite</mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-500">System Health</p>
+          <h3 class="text-2xl font-bold text-slate-800">{{ (stats$ | async)?.systemHealth }}%</h3>
+        </div>
+      </div>
+      <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+        <div class="bg-rose-500 h-2 rounded-full transition-all duration-500" [style.width.%]="(stats$ | async)?.systemHealth || 0"></div>
+      </div>
+      <p class="text-xs text-slate-400 mt-2">Operational Status: Normal</p>
+    </div>
+  </div>
+
+  <!-- Main GridLogs -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Recent Logs -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+          <h3 class="font-bold text-lg text-slate-800">Recent System Logs</h3>
+          <button class="text-sm text-indigo-600 font-medium hover:underline">View All</button>
+        </div>
+        
+        <div class="divide-y divide-slate-50">
+          <ng-container *ngIf="(recentLogs$ | async) as logs">
+            <div *ngFor="let log of logs" class="p-4 hover:bg-slate-50 transition-colors flex items-start gap-4">
+              <div [ngClass]="{
+                'bg-blue-50 text-blue-600': log.level === 'info',
+                'bg-amber-50 text-amber-600': log.level === 'warn',
+                'bg-red-50 text-red-600': log.level === 'error'
+              }" class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                <mat-icon class="text-sm">{{ getLogIcon(log.level) }}</mat-icon>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-slate-900 truncate">{{ log.message }}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs text-slate-500">{{ log.timestamp | date:'medium' }}</span>
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{{ log.source }}</span>
+                </div>
+              </div>
+              <button class="text-slate-400 hover:text-slate-600">
+                <mat-icon class="text-lg">chevron_right</mat-icon>
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+       <!-- Integrations Status -->
+       <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100">
+          <h3 class="font-bold text-lg text-slate-800">Service Integrations</h3>
+        </div>
+        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div *ngFor="let integration of (integrationStatus$ | async)" 
+                 class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div class="flex items-center gap-3">
+                <mat-icon [class.text-emerald-500]="integration.status === 'online'" 
+                          [class.text-red-500]="integration.status === 'offline'"
+                          class="text-xl">
+                  {{ integration.status === 'online' ? 'check_circle' : 'error' }}
+                </mat-icon>
+                <span class="font-medium text-slate-700">{{ integration.name }}</span>
+              </div>
+              <span [class.bg-emerald-100]="integration.status === 'online'"
+                    [class.text-emerald-700]="integration.status === 'online'"
+                    [class.bg-red-100]="integration.status === 'offline'"
+                    [class.text-red-700]="integration.status === 'offline'"
+                    class="px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
+                {{ integration.status }}
+              </span>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Quick Actions & Controls -->
+    <div class="space-y-6">
+      
+      <!-- Critical Actions -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-red-50 to-white">
+          <h3 class="font-bold text-lg text-red-900 flex items-center gap-2">
+            <mat-icon class="text-red-500">gavel</mat-icon>
+            Super Admin Controls
+          </h3>
+          <p class="text-xs text-red-600/70 mt-1">Authorized Personnel Only</p>
+        </div>
+        <div class="p-4 space-y-3">
+          <button class="w-full flex items-center justify-between p-3 rounded-xl border border-red-100 bg-red-50/30 hover:bg-red-50 text-red-700 transition-colors group">
+            <div class="flex items-center gap-3">
+              <mat-icon>lock_reset</mat-icon>
+              <span class="font-medium text-sm">Force Password Reset</span>
+            </div>
+            <mat-icon class="text-red-400 group-hover:translate-x-1 transition-transform">arrow_forward</mat-icon>
+          </button>
+          
+          <button class="w-full flex items-center justify-between p-3 rounded-xl border border-orange-100 bg-orange-50/30 hover:bg-orange-50 text-orange-700 transition-colors group">
+            <div class="flex items-center gap-3">
+              <mat-icon>warning_amber</mat-icon>
+              <span class="font-medium text-sm">Maintenance Mode</span>
+            </div>
+            <mat-icon class="text-orange-400 group-hover:translate-x-1 transition-transform">arrow_forward</mat-icon>
+          </button>
+
+          <button class="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors group">
+            <div class="flex items-center gap-3">
+              <mat-icon>delete_sweep</mat-icon>
+              <span class="font-medium text-sm">Clear System Cache</span>
+            </div>
+            <mat-icon class="text-slate-400 group-hover:translate-x-1 transition-transform">arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-600/30 text-white p-6 relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <h3 class="font-bold text-lg mb-4 relative z-10">Deployments</h3>
+        <p class="text-indigo-100 text-sm mb-6 relative z-10">Manage system versions and rollouts directly from the dashboard.</p>
+        <button class="w-full py-3 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 transition-colors shadow-sm relative z-10">
+          Manage Deployments
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

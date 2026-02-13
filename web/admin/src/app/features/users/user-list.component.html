@@ -1,0 +1,109 @@
+<div class="space-y-6">
+  
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">User Management</h1>
+      <p class="text-slate-500">Manage access and roles for all system users.</p>
+    </div>
+    <button mat-flat-button color="primary" class="bg-indigo-600 text-white rounded-lg px-6 py-2">
+      <mat-icon class="mr-2">person_add</mat-icon>
+      Create User
+    </button>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+    
+    <!-- Filters / Search -->
+    <div class="p-4 border-b border-slate-100 flex items-center gap-4 bg-slate-50/50">
+      <div class="relative">
+        <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</mat-icon>
+        <input type="text" placeholder="Search users..." class="pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+      </div>
+      <div class="flex-1"></div>
+      <button class="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">
+        <mat-icon class="text-sm">filter_list</mat-icon>
+        Filter
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-slate-600">
+        <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-4">User</th>
+            <th class="px-6 py-4">Role</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let user of (users$ | async)" class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+                  {{ user.email.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <div class="font-medium text-slate-900">{{ user.email }}</div>
+                  <div class="text-xs text-slate-400">ID: {{ user.id }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+                [ngClass]="{
+                  'bg-indigo-50 text-indigo-700': user.role === 'admin',
+                  'bg-slate-100 text-slate-600': user.role !== 'admin'
+                }">
+                {{ user.role }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+                [ngClass]="{
+                  'bg-emerald-50 text-emerald-700': user.status === 'active',
+                  'bg-amber-50 text-amber-700': user.status === 'inactive' || user.status === 'invited'
+                }">
+                <span class="w-1.5 h-1.5 rounded-full" [ngClass]="{
+                  'bg-emerald-500': user.status === 'active',
+                  'bg-amber-500': user.status !== 'active'
+                }"></span>
+                {{ user.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="text-slate-400 hover:text-slate-600">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit Details</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  <span>Change Role</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item class="text-red-600">
+                  <mat-icon class="text-red-500">block</mat-icon>
+                  <span>Suspend User</span>
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500 bg-slate-50/30">
+      <span>Showing 1-10 of 50 users</span>
+      <div class="flex gap-2">
+        <button class="px-3 py-1 border border-slate-200 rounded hover:bg-white disabled:opacity-50" disabled>Previous</button>
+        <button class="px-3 py-1 border border-slate-200 rounded hover:bg-white">Next</button>
+      </div>
+    </div>
+  </div>
+</div>

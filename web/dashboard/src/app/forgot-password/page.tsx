@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Forgot password?</h2>
             <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
-              No worries, we'll send you reset instructions.
+              No worries, we&apos;ll send you reset instructions.
             </p>
           </div>
 

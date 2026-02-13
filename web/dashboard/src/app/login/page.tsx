@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, Github, CheckCircle2, ChevronRight, Twitter, Chrome } from 'lucide-react';
-import api from '@/lib/axios';
+import { useAuth } from '@/lib/auth-context';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,10 +21,7 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      const response = await api.post('/auth/authenticate', { email, password });
-      const { token } = response.data;
-      localStorage.setItem('token', token);
-      router.push('/dashboard');
+      await login(email);
     } catch (err: any) {
       setError('Invalid email or password. Please try again.');
       console.error(err);
@@ -209,9 +207,9 @@ export default function LoginPage() {
           <div className="mt-8 text-center text-xs text-gray-500">
             Protected by Enterprise Guard. <br/>
             By connecting, you agree to our{' '}
-            <a href="#" className="underline hover:text-gray-900">Terms</a>{' '}
+            <a href="/terms" className="underline hover:text-gray-900">Terms</a>{' '}
             and{' '}
-            <a href="#" className="underline hover:text-gray-900">Privacy Policy</a>.
+            <a href="/privacy" className="underline hover:text-gray-900">Privacy Policy</a>.
           </div>
         </div>
       </div>
