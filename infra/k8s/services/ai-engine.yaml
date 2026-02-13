@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-engine
+  labels:
+    app: ai-engine
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: ai-engine
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-engine
+  labels:
+    app: ai-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-engine
+  template:
+    metadata:
+      labels:
+        app: ai-engine
+    spec:
+      containers:
+        - name: ai-engine
+          image: ai-engine:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: OPENAI_API_KEY
+            - name: PINECONE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: PINECONE_API_KEY
+            - name: PINECONE_ENV
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: PINECONE_ENV
+            - name: WEAVIATE_URL
+              value: "http://weaviate:8081"
+            - name: CORE_BACKEND_URL
+              value: "http://core-backend:8081"
+            - name: RABBITMQ_URL
+              value: "amqp://guest:guest@rabbitmq:5672/"
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"

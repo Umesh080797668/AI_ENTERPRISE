@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-backend
+  labels:
+    app: core-backend
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: core-backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-backend
+  labels:
+    app: core-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: core-backend
+  template:
+    metadata:
+      labels:
+        app: core-backend
+    spec:
+      containers:
+        - name: core-backend
+          image: core-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "main_db"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/main_db"
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"

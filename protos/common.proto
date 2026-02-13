@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package common;
+
+service DataService {
+  rpc GetDocument (DocumentRequest) returns (DocumentResponse);
+  rpc ProcessWorkflow (WorkflowRequest) returns (WorkflowResponse);
+}
+
+message DocumentRequest {
+  string id = 1;
+}
+
+message DocumentResponse {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+}
+
+message WorkflowRequest {
+  string workflow_id = 1;
+  string payload = 2;
+}
+
+message WorkflowResponse {
+  bool success = 1;
+  string message = 2;
+}

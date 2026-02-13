@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-worker
+  labels:
+    app: ingestion-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingestion-worker
+  template:
+    metadata:
+      labels:
+        app: ingestion-worker
+    spec:
+      containers:
+        - name: ingestion-worker
+          image: ingestion-worker:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: OPENAI_API_KEY
+            - name: WEAVIATE_URL
+              value: "http://weaviate:8080"
+            - name: CORE_BACKEND_URL
+              value: "http://core-backend:8080"
+            - name: AI_ENGINE_URL
+              value: "http://ai-engine:8000"
+            - name: RABBITMQ_URL
+              value: "amqp://guest:guest@rabbitmq:5672/"
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"
